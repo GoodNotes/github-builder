@@ -63,6 +63,10 @@ on:
         description: "Context to build from in the Git working tree"
         required: false
         default: .
+      build-contexts:
+        type: string
+        description: "List of additional named build contexts (e.g. name=path, name=docker-image://..., one per line)"
+        required: false
       file:
         type: string
         description: "Path to the Dockerfile"
@@ -823,6 +827,7 @@ jobs:
         with:
           annotations: ${{ steps.prepare.outputs.annotations }}
           build-args: ${{ steps.prepare.outputs.build-args }}
+          build-contexts: ${{ inputs.build-contexts }}
           cache-from: ${{ steps.prepare.outputs.cache-from }}
           cache-to: ${{ steps.prepare.outputs.cache-to }}
           context: ${{ steps.prepare.outputs.context }}
