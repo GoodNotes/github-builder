@@ -133,6 +133,14 @@ on:
         type: string
         description: "Flavor defines a global behavior for meta-tags"
         required: false
+      aws-region:
+        type: string
+        description: "AWS region to use when assuming the OIDC role for ECR auth"
+        required: false
+      aws-role-to-assume:
+        type: string
+        description: "IAM role ARN to assume via OIDC for ECR auth before docker/login-action"
+        required: false
     secrets:
       registry-auths:
         description: "Raw authentication to registries, defined as YAML objects (for image output)"
@@ -467,6 +475,9 @@ jobs:
     runs-on: ${{ matrix.runner }}
     needs:
       - prepare
+    permissions:
+      id-token: write
+      contents: read
     strategy:
       fail-fast: ${{ inputs.fail-fast }}
       matrix:
@@ -815,6 +826,13 @@ jobs:
               core.setOutput('provenance', Build.resolveProvenanceAttrs(`mode=max,version=v1`));
             }
       -
+        name: Configure AWS Credentials
+        if: ${{ inputs.push && inputs.output == 'image' && inputs.aws-role-to-assume != '' }}
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          role-to-assume: ${{ inputs.aws-role-to-assume }}
+      -
         name: Login to registry
         if: ${{ inputs.push && inputs.output == 'image' }}
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
@@ -844,6 +862,13 @@ jobs:
         env:
           BUILDKIT_MULTI_PLATFORM: 1
           GIT_AUTH_TOKEN: ${{ secrets.github-token || github.token }}
+      -
+        name: Configure AWS Credentials for signing
+        if: ${{ needs.prepare.outputs.sign == 'true' && inputs.output == 'image' && inputs.aws-role-to-assume != '' }}
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          role-to-assume: ${{ inputs.aws-role-to-assume }}
       -
         name: Login to registry for signing
         if: ${{ needs.prepare.outputs.sign == 'true' && inputs.output == 'image' }}
@@ -964,6 +989,9 @@ jobs:
 
   finalize:
     runs-on: ubuntu-24.04
+    permissions:
+      id-token: write
+      contents: read
     outputs:
       meta-json: ${{ steps.meta.outputs.json }}
       cosign-version: ${{ env.COSIGN_VERSION }}
@@ -1010,6 +1038,13 @@ jobs:
           flavor: ${{ inputs.meta-flavor }}
           labels: ${{ inputs.meta-labels }}
           annotations: ${{ inputs.meta-annotations }}
+      -
+        name: Configure AWS Credentials
+        if: ${{ inputs.push && inputs.output == 'image' && inputs.aws-role-to-assume != '' }}
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          role-to-assume: ${{ inputs.aws-role-to-assume }}
       -
         name: Login to registry
         if: ${{ inputs.push && inputs.output == 'image' }}
