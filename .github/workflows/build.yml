@@ -598,7 +598,7 @@ jobs:
                   [cache.gha.verify.policy]
                     timestampThreshold = 1
                     tlogThreshold = ${{ needs.prepare.outputs.privateRepo == 'true' && '0' || '1' }}
-                    subjectAlternativeName = "https://github.com/docker/github-builder/.github/workflows/build.yml*"
+                    subjectAlternativeName = "https://github.com/GoodNotes/github-builder/.github/workflows/build.yml*"
                     githubWorkflowRepository = "${{ github.repository }}"
                     issuer = "https://token.actions.githubusercontent.com"
                     runnerEnvironment = "github-hosted"
@@ -900,7 +900,7 @@ jobs:
             });
             
             const verifyResults = await sigstore.verifySignedManifests(signResults, {
-              certificateIdentityRegexp: `^https://github.com/docker/github-builder/.github/workflows/build.yml.*$`,
+              certificateIdentityRegexp: `^https://github.com/GoodNotes/github-builder/.github/workflows/build.yml.*$`,
               retryOnManifestUnknown: true
             });
             
@@ -932,7 +932,7 @@ jobs:
             });
             
             const verifyResults = await sigstore.verifySignedArtifacts(signResults, {
-              certificateIdentityRegexp: `^https://github.com/docker/github-builder/.github/workflows/build.yml.*$`
+              certificateIdentityRegexp: `^https://github.com/GoodNotes/github-builder/.github/workflows/build.yml.*$`
             });
             
             await core.group(`Verify commands`, async () => {
