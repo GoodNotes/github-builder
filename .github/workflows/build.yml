@@ -141,12 +141,23 @@ on:
         type: string
         description: "IAM role ARN to assume via OIDC for ECR auth before docker/login-action"
         required: false
+      secret-envs:
+        type: string
+        description: "List of secret env vars to expose to the build (e.g., key=envname, MY_SECRET=MY_ENV_VAR)"
+        required: false
+      secret-files:
+        type: string
+        description: "List of secret files to expose to the build (e.g., key=filename, MY_SECRET=./secret.txt)"
+        required: false
     secrets:
       registry-auths:
         description: "Raw authentication to registries, defined as YAML objects (for image output)"
         required: false
       github-token:
         description: "GitHub Token used to authenticate against the repository for Git context"
+        required: false
+      build-secrets:
+        description: "List of secrets to expose to the build (e.g., key=string, GIT_AUTH_TOKEN=mytoken)"
         required: false
     outputs:
       meta-json:
@@ -855,7 +866,11 @@ jobs:
           platforms: ${{ steps.prepare.outputs.platform }}
           provenance: ${{ steps.prepare.outputs.provenance }}
           sbom: ${{ steps.prepare.outputs.sbom }}
-          secret-envs: GIT_AUTH_TOKEN=GIT_AUTH_TOKEN
+          secrets: ${{ secrets.build-secrets }}
+          secret-envs: |
+            GIT_AUTH_TOKEN=GIT_AUTH_TOKEN
+            ${{ inputs.secret-envs }}
+          secret-files: ${{ inputs.secret-files }}
           shm-size: ${{ inputs.shm-size }}
           target: ${{ inputs.target }}
           ulimit: ${{ inputs.ulimit }}
