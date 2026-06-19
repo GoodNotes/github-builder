@@ -838,14 +838,14 @@ jobs:
             }
       -
         name: Configure AWS Credentials
-        if: ${{ inputs.push && inputs.output == 'image' && inputs.aws-role-to-assume != '' }}
+        if: ${{ inputs.output == 'image' && inputs.aws-role-to-assume != '' }}
         uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
         with:
           aws-region: ${{ inputs.aws-region }}
           role-to-assume: ${{ inputs.aws-role-to-assume }}
       -
         name: Login to registry
-        if: ${{ inputs.push && inputs.output == 'image' }}
+        if: ${{ inputs.output == 'image' }}
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry-auth: ${{ secrets.registry-auths }}
